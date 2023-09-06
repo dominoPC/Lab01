@@ -7,20 +7,19 @@ import static java.nio.file.StandardOpenOption.*;
 
 public class ProductWriter {
     public static void main(String[] args) {
-        List<String[]> products = new ArrayList<>(); //create an ArrayList to store records
+        List<Product> products = new ArrayList<>(); //create an ArrayList to store records
         Scanner in = new Scanner(System.in); //Scanner used for SafeInput
 
+        int id = 1;
         do { //runs once before checking for more records
-            String[] record = new String[3]; //record holds a string for data elements
-
-            //use SafeInput to get a name and add it to the record
-            record[0] = SafeInput.getNonZeroLenString(in, "Please enter a name");
-            //then do the same for description
-            record[1] = SafeInput.getNonZeroLenString(in, "Please enter a description");
-            //converts double to String
-            record[2] = String.valueOf(SafeInput.getDouble(in, "Please enter a cost"));
-
+            Product record = new Product(
+                    String.format("%06d", id),
+                    SafeInput.getNonZeroLenString(in, "Please enter a name"),
+                    SafeInput.getNonZeroLenString(in, "Please enter a description"),
+                    SafeInput.getDouble(in, "Please enter a cost")
+                );
             products.add(record); //adds the record to the products ArrayList
+            id++;
         } while(SafeInput.getYNConfirm(in, "Would you like to enter another record?")); //check to enter more records
 
         String filename = SafeInput.getNonZeroLenString(in, "Please enter a file name");
@@ -31,16 +30,11 @@ public class ProductWriter {
             OutputStream out = new BufferedOutputStream(Files.newOutputStream(file, CREATE));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
-            int id = 1; //used for the record ID
-            for(String[] record:products){ //iterate through the ArrayList
-                if(id != 1){ //enter a new line for each record that's not the first
+            for(int i = 0; i < products.size(); i++){ //iterate through the ArrayList
+                if(i!=0){ //enter a new line for each record that's not the first
                     writer.newLine();
                 }
-                writer.write(String.format("%06d", id)); //write the zero-padded ID
-                id++;
-                for(String datum: record){ //write the other records
-                    writer.write("," + datum); //comma-separated
-                }
+                writer.write(products.get(i).toCSVDataRecord());
             }
             writer.close(); //flush the stream
         }

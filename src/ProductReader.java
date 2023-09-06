@@ -1,5 +1,8 @@
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.nio.file.StandardOpenOption.*;
 import javax.swing.JFileChooser;
 
@@ -15,17 +18,20 @@ public class ProductReader {
                 Path file = selectedFile.toPath();
                 InputStream in = new BufferedInputStream(Files.newInputStream(file, CREATE));
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-                System.out.println("ID#    | Name      | Description             | Cost");
-                System.out.println("-------+-----------+-------------------------+--------");
+                List<Product> products = new ArrayList<>();
                 while(reader.ready()){
                     String line = reader.readLine(); //read each line in the file
                     String[] data = line.split(","); //create a String array from the line delineated by commas
-
-                    System.out.print(data[0] + " |"); //print ID
-                    System.out.print(String.format(" %-10s", data[1]) + "|"); // name
-                    System.out.print(String.format(" %-24s", data[2]) + "|"); //description
-                    System.out.println(" " + data[3]); //cost
+                    Product record = new Product(data[0],data[1],data[2],Double.parseDouble(data[3]));
+                    products.add(record);
+                }
+                System.out.println("ID#    | Name      | Description             | Cost");
+                System.out.println("-------+-----------+-------------------------+--------");
+                for(Product record:products) {
+                    System.out.print(record.getID() + " |"); //print ID
+                    System.out.print(String.format(" %-10s", record.getName()) + "|"); // name
+                    System.out.print(String.format(" %-24s", record.getDescription()) + "|"); //description
+                    System.out.println(" " + Double.toString(record.getCost())); //cost
                 }
                 reader.close();
             }
